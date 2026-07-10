@@ -134,7 +134,6 @@ C → [pick a shape key]
 ├────────────────────────────────────────┤
 │  Generate Lip Sync:                    │
 │  [path/to/file.json         ] [📁]    │
-│  ☑ Use VSE Audio Offset                │
 │  [▶ Apply to Timeline]  [🗑 Clear]     │
 └────────────────────────────────────────┘
 ```

@@ -134,7 +134,6 @@ C → [选择 Shape Key]
 ├────────────────────────────────────────┤
 │  Generate Lip Sync:                    │
 │  [选择 JSON 文件路径...] [📁]         │
-│  ☑ Use VSE Audio Offset                │
 │  [▶ Apply to Timeline]  [🗑 Clear]     │
 └────────────────────────────────────────┘
 ```
