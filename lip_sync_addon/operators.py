@@ -87,11 +87,6 @@ class HIPPO_LIPSYNC_OT_apply_lip_sync(bpy.types.Operator):
                 {'WARNING'}, "No mappings set. Please configure the mapping table first.")
             return {'CANCELLED'}
 
-        # ── Audio offset from VSE ──────────────────────────────────────
-        audio_offset = 0
-        if scene.lipsync.use_vse_offset:
-            audio_offset = core.get_audio_offset_from_sequencer(scene)
-
         # ── Parse JSON ─────────────────────────────────────────────────
         json_path = scene.lipsync.json_file_path
         try:
@@ -105,7 +100,7 @@ class HIPPO_LIPSYNC_OT_apply_lip_sync(bpy.types.Operator):
             return {'CANCELLED'}
 
         # ── Apply ──────────────────────────────────────────────────────
-        core.apply_lip_sync_to_mesh(obj, mouth_cues, mapping, audio_offset)
+        core.apply_lip_sync_to_mesh(obj, mouth_cues, mapping)
 
         non_x_count = len([c for c in mouth_cues if c.get('value') != 'X'])
         self.report({'INFO'}, f"Lip sync applied ({non_x_count} non-X cues)")

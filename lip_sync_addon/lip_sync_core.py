@@ -36,7 +36,7 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
         mesh_obj:      The Blender mesh object (must have shape keys).
         mouth_cues:    List of dicts [{start, end, value}, ...].
         mapping:       Dict {phoneme: shape_key_name} (A-H → shape key).
-        audio_offset:  Frame offset (e.g. from a VSE audio strip start).
+        audio_offset:  Optional global frame offset (default 0).
     """
     if not mesh_obj.data.shape_keys:
         return
@@ -114,13 +114,3 @@ def clear_shape_key_animation(mesh_obj):
     sk = mesh_obj.data.shape_keys
     if sk.animation_data and sk.animation_data.action:
         sk.animation_data.action.fcurves.clear()
-
-
-def get_audio_offset_from_sequencer(scene):
-    """Return the start frame of the first audio strip in the VSE, or 0."""
-    if not scene.sequence_editor:
-        return 0
-    for seq in scene.sequence_editor.sequences:
-        if seq.type == 'SOUND':
-            return seq.frame_start
-    return 0

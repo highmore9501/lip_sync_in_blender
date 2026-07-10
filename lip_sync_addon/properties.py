@@ -43,11 +43,6 @@ class LipSyncSceneProps(bpy.types.PropertyGroup):
         subtype='FILE_PATH',
         default="",
     )
-    use_vse_offset: bpy.props.BoolProperty(
-        name="Use VSE Audio Offset",
-        description="Auto-detect frame offset from the first audio strip in the VSE",
-        default=True,
-    )
 
 
 # ── Utility functions ──────────────────────────────────────────────────────

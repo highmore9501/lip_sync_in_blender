@@ -75,8 +75,6 @@ class HIPPO_LIPSYNC_PT_main_panel(bpy.types.Panel):
 
         layout.prop(lipsync, "json_file_path", text="")
 
-        layout.prop(lipsync, "use_vse_offset")
-
         row = layout.row(align=True)
         row.operator("hippo_lipsync.apply_lip_sync",
                      text="Apply to Timeline", icon='PLAY')
