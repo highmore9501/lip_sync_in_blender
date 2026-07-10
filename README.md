@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
 
-一个 Blender 5.0 插件，导入 [Rhubarb Lip Sync](https://github.com/LipSYNCInc/rhubarb-lip-sync) 生成的 JSON 口型文件，驱动角色网格的 Shape Key 生成嘴唇动画。
+一个 Blender 5.0 插件，导入 [Rhubarb Lip Sync](https://github.com/DanielSWolf/rhubarb-lip-sync) 生成的 JSON 口型文件，驱动角色网格的 Shape Key 生成嘴唇动画。
 
 ---
 

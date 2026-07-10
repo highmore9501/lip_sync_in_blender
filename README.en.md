@@ -2,7 +2,7 @@
 
 [![中文](https://img.shields.io/badge/lang-中文-green)](README.md)
 
-A Blender 5.0 addon that imports [Rhubarb Lip Sync](https://github.com/LipSYNCInc/rhubarb-lip-sync) JSON output and drives mesh shape keys to generate lip-sync animation.
+A Blender 5.0 addon that imports [Rhubarb Lip Sync](https://github.com/DanielSWolf/rhubarb-lip-sync) JSON output and drives mesh shape keys to generate lip-sync animation.
 
 ---
 
