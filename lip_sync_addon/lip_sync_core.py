@@ -99,15 +99,15 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
     for kb in key_blocks:
         kb.value = 0.0
 
-    # ── Step 2: filter out X cues ──────────────────────────────────────
+    # ── Step 2: pre-compute change_duration for ALL cues (incl. X) ────
+    for cue in mouth_cues:
+        cue['_change_duration'] = _calc_change_duration(
+            cue['start'], cue['end'])
+
+    # ── Step 3: filter out X cues ──────────────────────────────────────
     non_x_cues = [c for c in mouth_cues if c.get('value') != 'X']
     if not non_x_cues:
         return
-
-    # ── Step 3: pre-compute change_duration for each cue ───────────────
-    for cue in non_x_cues:
-        cue['_change_duration'] = _calc_change_duration(
-            cue['start'], cue['end'])
 
     # ── Step 4: temporarily disable auto-keyframe ──────────────────────
     use_auto_key = scene.tool_settings.use_keyframe_insert_auto
@@ -124,11 +124,12 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
         end = cue['end']
         change_dur = cue['_change_duration']
 
-        # Previous cue's change_duration (for fade-in timing), 0 if first cue
-        if i > 0:
-            pre_change_dur = non_x_cues[i - 1]['_change_duration']
+        # Find the actual preceding cue in the original mouth_cues list
+        idx_in_full = next(j for j, c in enumerate(mouth_cues) if c is cue)
+        if idx_in_full > 0:
+            pre_change_dur = mouth_cues[idx_in_full - 1]['_change_duration']
         else:
-            pre_change_dur = 0.0
+            pre_change_dur = change_dur  # first cue, fall back to current
 
         keyblock = key_blocks[shape_key_name]
 
