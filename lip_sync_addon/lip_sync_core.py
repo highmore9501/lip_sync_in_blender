@@ -124,16 +124,16 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
         end = cue['end']
         change_dur = cue['_change_duration']
 
-        # Determine the next cue's change_duration for fade-out
-        if i + 1 < len(non_x_cues):
-            next_change_dur = non_x_cues[i + 1]['_change_duration']
+        # Previous cue's change_duration (for fade-in timing), 0 if first cue
+        if i > 0:
+            pre_change_dur = non_x_cues[i - 1]['_change_duration']
         else:
-            next_change_dur = change_dur  # last cue uses its own
+            pre_change_dur = 0.0
 
         keyblock = key_blocks[shape_key_name]
 
         # Frame 1 — fade-in start (value = 0.0)
-        t1 = max(0.0, start - 0.75 * change_dur)
+        t1 = max(0.0, start - pre_change_dur)
         f1 = int(t1 * fps) + audio_offset
         keyblock.value = 0.0
         keyblock.keyframe_insert(data_path='value', frame=f1)
@@ -143,14 +143,14 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
         keyblock.value = 1.0
         keyblock.keyframe_insert(data_path='value', frame=f2)
 
-        # Frame 3 — hold end (value = 1.0)
-        f3 = int(end * fps) + audio_offset
+        # Frame 3 — hold end / fade-out start (value = 1.0)
+        t3 = end - change_dur
+        f3 = int(t3 * fps) + audio_offset
         keyblock.value = 1.0
         keyblock.keyframe_insert(data_path='value', frame=f3)
 
         # Frame 4 — fade-out complete (value = 0.0)
-        t4 = end + 0.75 * next_change_dur
-        f4 = int(t4 * fps) + audio_offset
+        f4 = int(end * fps) + audio_offset
         keyblock.value = 0.0
         keyblock.keyframe_insert(data_path='value', frame=f4)
 
