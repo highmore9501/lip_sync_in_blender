@@ -94,21 +94,26 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
     fps = get_scene_fps(scene)
     key_blocks = mesh_obj.data.shape_keys.key_blocks
 
-    # ── Step 1: filter out X cues ──────────────────────────────────────
+    # ── Step 1: clear existing animation and reset all shape keys to 0 ─
+    clear_shape_key_animation(mesh_obj)
+    for kb in key_blocks:
+        kb.value = 0.0
+
+    # ── Step 2: filter out X cues ──────────────────────────────────────
     non_x_cues = [c for c in mouth_cues if c.get('value') != 'X']
     if not non_x_cues:
         return
 
-    # ── Step 2: pre-compute change_duration for each cue ───────────────
+    # ── Step 3: pre-compute change_duration for each cue ───────────────
     for cue in non_x_cues:
         cue['_change_duration'] = _calc_change_duration(
             cue['start'], cue['end'])
 
-    # ── Step 3: temporarily disable auto-keyframe ──────────────────────
+    # ── Step 4: temporarily disable auto-keyframe ──────────────────────
     use_auto_key = scene.tool_settings.use_keyframe_insert_auto
     scene.tool_settings.use_keyframe_insert_auto = False
 
-    # ── Step 4: iterate cues and insert keyframes ──────────────────────
+    # ── Step 5: iterate cues and insert keyframes ──────────────────────
     for i, cue in enumerate(non_x_cues):
         phoneme = cue['value']
         shape_key_name = mapping.get(phoneme, '')
@@ -128,7 +133,7 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
         keyblock = key_blocks[shape_key_name]
 
         # Frame 1 — fade-in start (value = 0.0)
-        t1 = max(0.0, start - change_dur)
+        t1 = max(0.0, start - 0.75 * change_dur)
         f1 = int(t1 * fps) + audio_offset
         keyblock.value = 0.0
         keyblock.keyframe_insert(data_path='value', frame=f1)
@@ -144,12 +149,12 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
         keyblock.keyframe_insert(data_path='value', frame=f3)
 
         # Frame 4 — fade-out complete (value = 0.0)
-        t4 = end + next_change_dur
+        t4 = end + 0.75 * next_change_dur
         f4 = int(t4 * fps) + audio_offset
         keyblock.value = 0.0
         keyblock.keyframe_insert(data_path='value', frame=f4)
 
-    # ── Step 5: restore auto-keyframe setting ──────────────────────────
+    # ── Step 6: restore auto-keyframe setting ──────────────────────────
     scene.tool_settings.use_keyframe_insert_auto = use_auto_key
 
 
@@ -157,9 +162,15 @@ def apply_lip_sync_to_mesh(mesh_obj, mouth_cues, mapping, audio_offset=0):
 
 
 def clear_shape_key_animation(mesh_obj):
-    """Remove all f-curves from the shape-key animation data."""
+    """Remove all animation data from the shape keys.
+
+    In Blender 5.0, Action uses a layered system (Action.layers →
+    ActionLayer → ActionKeyframeStrip → fcurves), so the old
+    action.fcurves access no longer works. Instead we disconnect the
+    action entirely — Blender will create a fresh one on next write.
+    """
     if not mesh_obj.data.shape_keys:
         return
     sk = mesh_obj.data.shape_keys
-    if sk.animation_data and sk.animation_data.action:
-        sk.animation_data.action.fcurves.clear()
+    if sk.animation_data:
+        sk.animation_data.action = None

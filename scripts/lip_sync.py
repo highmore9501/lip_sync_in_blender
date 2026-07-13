@@ -44,10 +44,15 @@ sequencer_editor = bpy.context.scene.sequence_editor
 
 def clear_all_shapekey(mesh_name):
     ob = bpy.data.objects[mesh_name]
-    if hasattr(ob.data, "shape_keys"):
-        if ob.data.shape_keys and ob.data.shape_keys.animation_data and ob.data.shape_keys.animation_data.action:
-            for fcurve in ob.data.shape_keys.animation_data.action.fcurves:
-                fcurve.keyframe_points.clear()
+    if not hasattr(ob.data, "shape_keys") or not ob.data.shape_keys:
+        return
+    sk = ob.data.shape_keys
+    # 删除所有 fcurves（彻底清除动画数据）
+    if sk.animation_data and sk.animation_data.action:
+        sk.animation_data.action.fcurves.clear()
+    # 将所有 shape key value 归零
+    for kb in sk.key_blocks:
+        kb.value = 0.0
 
 
 def main(lip_sync_info_dir, mesh_name):

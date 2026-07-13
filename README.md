@@ -2,7 +2,12 @@
 
 [![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
 
-一个 Blender 5.0 插件，导入 [Rhubarb Lip Sync](https://github.com/DanielSWolf/rhubarb-lip-sync) 生成的 JSON 口型文件，驱动角色网格的 Shape Key 生成嘴唇动画。
+一个 Blender 5.0 插件，导入口型文件并驱动角色网格的 Shape Key 生成嘴唇动画。
+
+支持两种口型生成工具：
+
+- [Rhubarb Lip Sync](https://github.com/DanielSWolf/rhubarb-lip-sync) — 生成 JSON 格式（8 口型：A~H + X）
+- [Cherry Lip Sync](https://github.com/amberwhitehead/cherry-lip-sync) — 生成 TSV 格式（12 口型：A~K + X）
 
 ---
 
@@ -20,16 +25,42 @@
 
 ## 前置准备
 
-1. **Rhubarb Lip Sync**（[官网下载](https://github.com/DanielSWolf/rhubarb-lip-sync/releases)）  
-   用于将语音 WAV 文件转化为口型 JSON 文件。命令行使用示例：
+本插件支持以下两种口型生成工具（任选其一即可）：
 
-   ```bash
-   rhubarb.exe -r phonetic -f json -o output.json input.wav
-   ```
+### 方案 A：Rhubarb Lip Sync（8 口型）
 
-2. **Blender 5.0** 或更高版本。
+[官网下载](https://github.com/DanielSWolf/rhubarb-lip-sync/releases)  
+将语音 WAV 文件转化为 JSON 格式的口型文件：
 
-3. **一个带 Shape Key 的网格模型**（如 VRM、Ready Player Me、MMD 等）。
+```bash
+rhubarb.exe -r phonetic -f json -o output.json input.wav
+```
+
+口型符号：`A, B, C, D, E, F, G, H, X`
+
+### 方案 B：Cherry Lip Sync（12 口型）
+
+[GitHub 下载](https://github.com/amberwhitehead/cherry-lip-sync/releases)  
+将语音文件（WAV/MP3/OGG/FLAC）转化为 TSV 格式的口型文件：
+
+```bash
+cherrylipsync.exe -i input.wav -o output.tsv -f 30
+```
+
+口型符号：`A, B, C, D, E, F, G, H, I, J, K, X`
+
+| 新增口型 | 发音    | 说明                     |
+| :------- | :------ | :----------------------- |
+| **I**    | EE      | 咧嘴，类似"一"音         |
+| **J**    | CH/J/SH | 噘嘴齿音，类似"吃/知/湿" |
+| **K**    | R       | 圆唇闭齿 R 音            |
+
+> 如果角色的 Shape Key 没有 I/J/K 对应的口型，可以从邻近口型复制：I→B, J→B, K→E。
+
+### 共同要求
+
+- **Blender 5.0** 或更高版本。
+- **一个带 Shape Key 的网格模型**（如 VRM、Ready Player Me、MMD 等）。
 
 ---
 
@@ -58,15 +89,15 @@
 
 ## 快速入门
 
-### 第一步：准备口型 JSON 文件
+### 第一步：准备口型文件
 
-用 Rhubarb 将语音文件转为口型 JSON：
+#### 方式 1：Rhubarb JSON
 
 ```bash
 rhubarb -r phonetic -f json -o my_audio.json my_audio.wav
 ```
 
-生成的 JSON 格式如下：
+生成的 JSON 格式：
 
 ```json
 {
@@ -78,32 +109,51 @@ rhubarb -r phonetic -f json -o my_audio.json my_audio.wav
 }
 ```
 
-其中 `value` 取值 `A~H`（不同口型）和 `X`（闭嘴/静音）。
+`value` 取值 `A~H`（不同口型）和 `X`（闭嘴/静音）。
+
+#### 方式 2：Cherry Lip Sync TSV
+
+```bash
+cherrylipsync -i my_audio.wav -o my_audio.tsv -f 30
+```
+
+生成的 TSV 格式（制表符分隔）：
+
+```text
+0.000	X
+0.133	C
+0.200	G
+0.300	I
+0.500	C
+0.633	X
+```
+
+`value` 取值 `A~K`（不同口型）和 `X`（闭嘴/静音）。
 
 ### 第二步：初始化映射表
 
 1. 在 Blender 中选中你的角色网格（必须含有 Shape Key）。
 2. 在 3D 视图侧边栏 → **Hippo's Lip Sync** → 点击 **Init Mapping**。
-3. 映射表会出现在面板中，每行对应一个口型（A~H）。
+3. 映射表会出现在面板中，每行对应一个口型（A~K）。
 
 ### 第三步：配置映射关系
 
-为每个口型（A~H）选择对应的 Shape Key：
+为每个口型（A~K）选择对应的 Shape Key：
 
 ```
-A → [选择 Shape Key]   ← 点击右侧下拉框，从网格已有的 Shape Key 中选择
-B → [选择 Shape Key]
-C → [选择 Shape Key]
-...
+A  → [选择 Shape Key]   ← 点击右侧下拉框，从网格已有的 Shape Key 中选择
+B  → [选择 Shape Key]
+C  → [选择 Shape Key]
+...  （共 A~K 十一个口型）
 ```
 
 > `X`（闭嘴/静音）会自动跳过，无需映射。
 
 ### 第四步：生成口型动画
 
-1. 点击 **JSON File** 右侧的文件夹图标，选择 Rhubarb 生成的 JSON 文件。
+1. 点击文件路径右侧的文件夹图标，选择 Rhubarb 生成的 `.json` 文件或 Cherry Lip Sync 生成的 `.tsv` 文件。
 2. （可选）勾选 **Use VSE Audio Offset**：如果你在 Video Sequence Editor 中放置了音频轨道，插件会自动检测音频起始帧偏移。
-3. 点击 **Apply to Timeline** → 插件解析 JSON 并自动写入 Shape Key 关键帧。
+3. 点击 **Apply to Timeline** → 插件自动识别文件格式（JSON 或 TSV）并写入 Shape Key 关键帧。
 
 ### 第五步：预览效果
 
@@ -130,10 +180,13 @@ C → [选择 Shape Key]
 │    F  [shape_key ▼ 下拉选择]           │
 │    G  [shape_key ▼ 下拉选择]           │
 │    H  [shape_key ▼ 下拉选择]           │
+│    I  [shape_key ▼ 下拉选择]           │  ← Cherry 新增（EE 咧嘴）
+│    J  [shape_key ▼ 下拉选择]           │  ← Cherry 新增（CH/J/SH）
+│    K  [shape_key ▼ 下拉选择]           │  ← Cherry 新增（R 音）
 │  X (silence) is auto-skipped           │
 ├────────────────────────────────────────┤
 │  Generate Lip Sync:                    │
-│  [选择 JSON 文件路径...] [📁]         │
+│  [选择 JSON/TSV 文件路径...]   [📁]   │
 │  [▶ Apply to Timeline]  [🗑 Clear]     │
 └────────────────────────────────────────┘
 ```
@@ -158,13 +211,18 @@ C → [选择 Shape Key]
 - 映射表中每个口型是否已选择对应的 Shape Key？
 - JSON 文件路径是否有效？
 
-### Q: 如何更换 JSON 文件？
+### Q: 如何更换口型文件？
 
-直接在 JSON 文件路径输入框中修改路径，或点击文件夹图标重新选择。
+直接在文件路径输入框中修改路径，或点击文件夹图标重新选择。支持 `.json`（Rhubarb）和 `.tsv`（Cherry Lip Sync）格式。
+
+### Q: 我的角色没有 I/J/K 对应的 Shape Key 怎么办？
+
+可以在映射表中将 I/J/K 映射到邻近口型：**I→B**（咧嘴）、**J→B**（齿音）、**K→E**（圆唇）。缺失映射时插件会自动跳过，不影响其他口型。
 
 ### Q: 动画效果不理想？
 
-- 调整 Rhubarb 的参数重新生成 JSON（如 `-r phonetic` 切换识别方法）
+- Rhubarb：调整参数重新生成（如 `-r phonetic` 切换识别方法）
+- Cherry Lip Sync：尝试 `--filter` 参数过滤单帧抖动
 - 检查映射表是否正确
 
 ---
@@ -181,11 +239,13 @@ lip_sync_in_blender/
 │   └── panels.py            # UI 面板 ── 3D 视图侧边栏
 ├── scripts/                 # 参考脚本
 │   ├── lip_sync.py          # 手动应用口型动画的示范
-│   └── make_lip_sync_info.py # 批量调用 Rhubarb 生成 JSON 的示范
+│   ├── make_lip_sync_info.py # 批量调用 Rhubarb 生成 JSON 的示范
+│   └── cherry_lip_sync_info.py # 批量调用 Cherry Lip Sync 生成 TSV 的示范
 ├── doc/                     # 文档
 │   ├── 施工计划.md
 │   ├── Lip_sync_blender插件开发需求.md
-│   └── 7月9日.json          # Rhubarb 输出示例
+│   ├── 7月9日.json          # Rhubarb 输出示例
+│   └── 米良三油屋四月 - 爱的代价钢琴弹唱版Cover 李宗盛_vocals.TSV  # Cherry Lip Sync 输出示例
 └── README.md
 ```
 
