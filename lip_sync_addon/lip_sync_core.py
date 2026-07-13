@@ -1,4 +1,5 @@
 import json
+import os
 import bpy
 
 
@@ -13,6 +14,54 @@ def parse_lip_sync_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data.get('mouthCues', [])
+
+
+def parse_lip_sync_tsv(tsv_path):
+    """Parse a Cherry Lip Sync TSV file and return the mouthCues list.
+
+    TSV format: timestamp (seconds) \\t phoneme (A-K or X) per line.
+    Each cue has the shape: {"start": float, "end": float, "value": str}.
+    """
+    entries = []
+    with open(tsv_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split('\t')
+            if len(parts) >= 2:
+                try:
+                    start = float(parts[0])
+                    value = parts[1].strip()
+                    entries.append({'start': start, 'value': value})
+                except ValueError:
+                    continue
+
+    # Convert to mouthCues with end time = next entry's start time
+    mouth_cues = []
+    for i, entry in enumerate(entries):
+        if i + 1 < len(entries):
+            end = entries[i + 1]['start']
+        else:
+            end = entry['start'] + 0.1  # fallback duration for last cue
+        mouth_cues.append({
+            'start': entry['start'],
+            'end': end,
+            'value': entry['value'],
+        })
+    return mouth_cues
+
+
+def parse_lip_sync_file(file_path):
+    """Auto-detect file format (.json or .tsv) and parse accordingly.
+
+    Returns the mouthCues list.
+    """
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == '.tsv':
+        return parse_lip_sync_tsv(file_path)
+    else:
+        return parse_lip_sync_json(file_path)
 
 
 def get_scene_fps(scene):

@@ -1,6 +1,6 @@
 import bpy
 
-PHONEMES = ["A", "B", "C", "D", "E", "F", "G", "H"]
+PHONEMES = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]
 
 
 class LipSyncMappingProps(bpy.types.PropertyGroup):
@@ -14,6 +14,9 @@ class LipSyncMappingProps(bpy.types.PropertyGroup):
     mapping_F: bpy.props.StringProperty(name="F", default="")
     mapping_G: bpy.props.StringProperty(name="G", default="")
     mapping_H: bpy.props.StringProperty(name="H", default="")
+    mapping_I: bpy.props.StringProperty(name="I", default="")
+    mapping_J: bpy.props.StringProperty(name="J", default="")
+    mapping_K: bpy.props.StringProperty(name="K", default="")
 
     def get_mapping_dict(self):
         """Return {phoneme: shape_key_name} dict."""
@@ -26,6 +29,9 @@ class LipSyncMappingProps(bpy.types.PropertyGroup):
             "F": self.mapping_F,
             "G": self.mapping_G,
             "H": self.mapping_H,
+            "I": self.mapping_I,
+            "J": self.mapping_J,
+            "K": self.mapping_K,
         }
 
     def set_from_dict(self, mapping_dict):
@@ -38,8 +44,8 @@ class LipSyncSceneProps(bpy.types.PropertyGroup):
     """Scene-level properties for the plugin."""
 
     json_file_path: bpy.props.StringProperty(
-        name="JSON File",
-        description="Path to Rhubarb lip sync JSON file",
+        name="Lip Sync File",
+        description="Path to lip sync file (Rhubarb JSON or Cherry TSV)",
         subtype='FILE_PATH',
         default="",
     )
@@ -49,7 +55,7 @@ class LipSyncSceneProps(bpy.types.PropertyGroup):
 
 
 def init_lip_sync_map(mesh_data):
-    """Initialize the lip_sync mapping table on mesh data (A-H all empty)."""
+    """Initialize the lip_sync mapping table on mesh data (A-K all empty)."""
     if not hasattr(mesh_data, 'lipsync_mapping') or mesh_data.lipsync_mapping is None:
         mesh_data.lipsync_mapping = mesh_data.lipsync_mapping.__class__()
     for p in PHONEMES:

@@ -76,10 +76,14 @@ class HIPPO_LIPSYNC_PT_main_panel(bpy.types.Panel):
         layout.prop(lipsync, "json_file_path", text="")
 
         row = layout.row(align=True)
-        row.operator("hippo_lipsync.apply_lip_sync",
-                     text="Apply to Timeline", icon='PLAY')
+        row.operator("hippo_lipsync.select_file",
+                     text="Browse File (JSON/TSV)", icon='FILE_FOLDER')
         row.operator("hippo_lipsync.clear_animation",
                      text="Clear", icon='TRASH')
+
+        row = layout.row(align=True)
+        row.operator("hippo_lipsync.apply_lip_sync",
+                     text="Apply to Timeline", icon='PLAY')
 
 
 # ── Registration ───────────────────────────────────────────────────────────
